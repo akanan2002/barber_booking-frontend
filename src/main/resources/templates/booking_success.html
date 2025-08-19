@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>การจองสำเร็จ</title>
+    <link rel="stylesheet" th:href="@{/css/booking.css}">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .success-box {
+            text-align: center;
+            background-color: white;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+        .success-box h2 {
+            color: #28a745;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .success-box p {
+            font-size: 18px;
+            color: #333;
+        }
+        .btn-group {
+            margin-top: 25px;
+        }
+        .btn-group a {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 12px 25px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-group a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="success-box">
+    <h2>✅ การจองสำเร็จ</h2>
+    <p>ขอบคุณที่ใช้บริการของเรา!</p>
+
+    <div class="btn-group">
+        <a href="/all-bookings">ดูผลการจองของคุณ</a>
+        <a href="/home">กลับไปหน้าแรก</a>
+    </div>
+</div>
+</body>
+</html>

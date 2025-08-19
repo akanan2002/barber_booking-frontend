@@ -1,0 +1,149 @@
+/* ===== Login/Register Page ===== */
+body.login-page {
+    background-color: #c5cae9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  .login-card {
+    background-color: #F6F9FE;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    display: flex;
+    overflow: hidden;
+    max-width: 900px;
+    width: 100%;
+  }
+  
+  .form-section {
+    flex: 1;
+    padding: 40px 60px;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #0C2D83;
+  }
+  
+  .login-form .form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .form-input {
+    padding: 12px 16px;
+    border: 1px solid #CED4DA;
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  
+  .form-input:focus {
+    border-color: #0C2D83;
+  }
+  
+  .btn-primary {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 12px;
+    background-color: #0C2D83;
+    color: #FFF;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color .2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: #072066;
+  }
+  
+  .signup-text {
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .link-text {
+    color: #0C2D83;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .link-text:hover {
+    text-decoration: underline;
+  }
+  
+  .illustration-section {
+    flex: 1;
+    background-color: #E4EBFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  
+  .illustration-section img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .form-switcher {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .switcher-btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem 0;
+    cursor: pointer;
+    font-weight: 500;
+    color: #555;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  
+  .switcher-btn.active {
+    color: #0C2D83;
+    border-color: #0C2D83;
+  }
+  
+  .top-right-buttons {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+  }
+  
+  .btn-small {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid #0C2D83;
+    border-radius: 6px;
+    background-color: transparent;
+    color: #0C2D83;
+    transition: background-color .2s, color .2s;
+    text-decoration: none;
+  }
+  
+  .btn-small:hover,
+  .btn-small.active {
+    background-color: #0C2D83;
+    color: #FFF;
+  }
+  

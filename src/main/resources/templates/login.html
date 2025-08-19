@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - GO2 Booking</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/login.css}">
+  
+
+</head>
+<body class="login-page">
+
+    <!-- ปุ่ม Login/Register มุมบนขวา -->
+  <div class="top-right-buttons">
+    <a th:href="@{/login}" class="btn-small active">Login</a>
+    <a th:href="@{/register}" class="btn-small">Register</a>
+  </div>
+
+  <div class="login-card">
+    <!-- ฝั่งฟอร์ม -->
+    <div class="form-section">
+      <h2 class="title">Welcome Back</h2>
+      <form th:action="@{/perform_login}" method="post" class="login-form">
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            required
+            class="form-input"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password" class="form-label">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            class="form-input"
+          />
+        </div>
+        <button type="submit" class="btn-primary">Login</button>
+      </form>
+      <p class="signup-text">
+        Don’t have an account?
+        <a th:href="@{/register}" class="link-text">Sign up here</a>
+      </p>
+    </div>
+
+    <!-- ฝั่งภาพประกอบ -->
+    <div class="illustration-section">
+      <img th:src="@{/images/photo2.jpg}" alt="Login illustration" />
+    </div>
+  </div>
+
+</body>
+</html>

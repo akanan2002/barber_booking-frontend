@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>รายการจองของคุณ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- CSRF (ปลอดภัยกับ Thymeleaf ทุกเวอร์ชัน) -->
+  <meta name="_csrf"        th:content="${_csrf != null ? _csrf.token      : ''}" />
+  <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}" />
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/user_bookings.css}">
+
+  <style>
+    :root{
+      --primary:#007bff; --primary-hover:#0056b3;
+      --muted:#888; --card:#ffffff; --bg:#f5f5f5; --border:#e5e5e5;
+      --radius:12px; --shadow:0 10px 25px rgba(0,0,0,.08);
+      --gold:#f5b301; --star-muted:#ddd;
+    }
+    *{ box-sizing:border-box }
+    body{ font-family:'Prompt',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background-color:var(--bg); padding:20px; color:#222 }
+    .container{ max-width:900px; margin:auto; background:var(--card); padding:24px; border-radius:var(--radius); box-shadow:var(--shadow) }
+    h1{ margin:0 0 16px 0; font-size:26px }
+    .profile-box{ background:#fafafa; border:1px solid var(--border); padding:12px 16px; border-radius:10px; margin-bottom:16px }
+    .booking-grid{ display:flex; flex-direction:column; gap:14px }
+    .booking-card{ border:1px solid var(--border); border-radius:10px; padding:14px; background:#fff; display:grid; grid-template-columns:1fr auto; gap:10px }
+    .booking-meta p{ margin:4px 0 }
+    .actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+    .badge{ display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid var(--border); background:#f8f8f8; color:#444 }
+    .badge-success{ background:#e8f6ee; color:#146c43; border-color:#bfe7d2 }
+    .badge-pending{ background:#fff6e5; color:#874d00; border-color:#ffd58a }
+    .badge-cancel{ background:#fdecec; color:#b42318; border-color:#f5b5b5 }
+    .btn{ appearance:none; border:none; cursor:pointer; border-radius:10px; padding:10px 14px; font-weight:600; transition:.15s; display:inline-flex; align-items:center; gap:8px }
+    .btn-primary{ background:var(--primary); color:#fff }
+    .btn-primary:hover{ background:var(--primary-hover) }
+    .btn-ghost{ background:#f2f4f7; color:#111 }
+    .btn-ghost:hover{ background:#e6e8ec }
+    /* เติมสไตล์ให้ปุ่มรายละเอียด */
+    .btn-outline{ background:#fff; color:#111; border:1px solid var(--border) }
+    .btn-outline:hover{ background:#f7f7f7 }
+    .back-button{ display:inline-block; padding:10px 16px; margin-top:20px; background:var(--primary); color:#fff; text-decoration:none; border-radius:8px }
+    .back-button:hover{ background:var(--primary-hover) }
+    .no-booking{ text-align:center; color:var(--muted); padding:24px 0 }
+
+    /* Modal */
+    .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:16px; z-index:1000 }
+    .modal{ width:100%; max-width:420px; background:#fff; border-radius:14px; box-shadow:var(--shadow); padding:16px; animation:pop .12s ease-out }
+    @keyframes pop{ from{ transform:translateY(6px); opacity:0 } to{ transform:none; opacity:1 } }
+    .modal header{ font-weight:700; margin-bottom:8px; font-size:18px }
+    .modal textarea{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px; resize:vertical }
+    .modal .row{ display:flex; gap:8px; justify-content:flex-end; margin-top:12px }
+
+    /* Stars (write) */
+    .stars{ display:inline-flex; flex-direction:row-reverse; gap:6px }
+    .stars input{ display:none }
+    .stars label{ font-size:30px; cursor:pointer; color:var(--star-muted); line-height:1; user-select:none; transition:color .12s ease }
+    .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label{ color:var(--gold) }
+
+    .muted{ color:var(--muted) }
+    .hint{ font-size:12px; color:#666; margin-top:4px }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>รายการจองของคุณ</h1>
+
+  <div class="profile-box">
+    <p><strong>ชื่อผู้ใช้:</strong> <span th:text="${username}">guest</span></p>
+  </div>
+
+  <div class="booking-grid">
+    <th:block th:if="${bookings != null and !bookings.isEmpty()}">
+      <th:block th:each="booking : ${bookings}">
+        <div class="booking-card">
+          <div class="booking-meta">
+            <p><b>บริการ:</b> <span th:text="${booking.service}">-</span></p>
+            <p><b>วันที่:</b> <span th:text="${booking.date}">-</span></p>
+            <p><b>เวลา:</b> <span th:text="${booking.time}">-</span></p>
+            <p><b>ช่าง:</b> <span th:text="${booking.barber}">-</span></p>
+            <p><b>หมายเหตุ:</b> <span th:text="${booking.note}">-</span></p>
+            <p>
+              <b>สถานะ:</b>
+              <th:block th:with="st=${booking.status}">
+                <span class="badge"
+                      th:classappend="${st}=='เสร็จสิ้น' ? ' badge-success' : (${st}=='ยกเลิก' ? ' badge-cancel' : ' badge-pending')"
+                      th:text="${st}">-</span>
+              </th:block>
+            </p>
+          </div>
+
+          <!-- null-safe -->
+          <div class="actions" style="justify-self:end"
+               th:with="isReviewed=${reviewedIds != null ? reviewedIds.contains(booking.id) : false}">
+            <button class="btn btn-primary"
+                    th:if="${!isReviewed}"
+                    th:attr="data-bid=${booking.id}, data-service=${booking.service}, data-barber=${booking.barber}"
+                    onclick="openReview(this)">
+              ⭐ ให้คะแนน
+            </button>
+
+            <span class="badge badge-success" th:if="${isReviewed}">รีวิวแล้ว</span>
+            <!-- ✅ แก้ตรงนี้: ใช้ booking.id และรูปแบบ parameterized -->
+            <a class="btn btn-ghost" th:href="@{/booking/detail/{id}(id=${booking.id})}">รายละเอียด</a>
+          </div>
+
+        </div>
+      </th:block>
+    </th:block>
+
+    <th:block th:if="${bookings == null or bookings.isEmpty()}">
+      <p class="no-booking">ไม่พบข้อมูลการจอง</p>
+    </th:block>
+  </div>
+
+  <a th:href="@{/home}" class="back-button">ย้อนกลับไปหน้าแรก</a>
+</div>
+
+<!-- Modal: Review -->
+<div id="rvBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+  <div class="modal">
+    <header id="rvTitle">ให้คะแนนบริการ</header>
+    <div id="rvInfo" class="muted" style="margin-bottom:6px">—</div>
+
+    <div class="stars" role="radiogroup" aria-label="ให้คะแนนเป็นดาว">
+      <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+      <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+    </div>
+    <div class="hint">แตะดาวเพื่อเลือกคะแนน (1–5)</div>
+
+    <label for="rvComment" class="hint" style="margin-top:10px; display:block">คอมเมนต์ (ไม่บังคับ)</label>
+    <textarea id="rvComment" rows="3" placeholder="เล่าประสบการณ์ของคุณ..."></textarea>
+
+    <div class="row">
+      <button class="btn btn-ghost" type="button" onclick="closeReview()">ยกเลิก</button>
+      <button class="btn btn-primary" type="button" onclick="submitReview()">ส่งรีวิว</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inline JS -->
+<script th:inline="javascript">
+  const POST_REVIEW_URL = /*[[@{/api/reviews}]]*/ '/api/reviews';
+
+  let currentBid = null;
+
+  function openReview(btn){
+    currentBid = Number(btn.dataset.bid);
+    const svc = btn.dataset.service || '';
+    const barber = btn.dataset.barber || '';
+    document.getElementById('rvInfo').textContent = `บริการ: ${svc}${barber ? ' • ช่าง: ' + barber : ''}`;
+    document.querySelectorAll('input[name=rating]').forEach(i=>i.checked=false);
+    document.getElementById('rvComment').value = '';
+    document.getElementById('rvBackdrop').style.display = 'flex';
+  }
+
+  function closeReview(){
+    document.getElementById('rvBackdrop').style.display = 'none';
+  }
+
+  async function submitReview(){
+    const rating = Number(document.querySelector('input[name=rating]:checked')?.value);
+    if(!rating){ alert('กรุณาให้คะแนนเป็นจำนวนดาว'); return; }
+    const comment = document.getElementById('rvComment').value.trim();
+
+    const bid = currentBid; // กันค่าโดนรีเซ็ต
+    const payload = { bookingId: bid, rating, comment };
+
+    // CSRF (ถ้ามี)
+    const csrf = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+    const headers = { 'Content-Type': 'application/json' };
+    if (csrf && csrfHeader) headers[csrfHeader] = csrf;
+
+    try{
+      const res = await fetch(POST_REVIEW_URL, {
+        method:'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+      if(res.ok){
+        alert('ขอบคุณสำหรับรีวิว!');
+        closeReview();
+        const btn = document.querySelector(`[data-bid="${bid}"]`);
+        if(btn){ btn.outerHTML = '<span class="badge badge-success">รีวิวแล้ว</span>'; }
+      }else{
+        const msg = await (async()=>{ try{ return await res.text(); }catch{ return res.status + ' ' + res.statusText; }})();
+        alert('ส่งรีวิวไม่สำเร็จ: ' + msg);
+      }
+    }catch(e){
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    }
+  }
+
+  // ปิดโมดัลเมื่อคลิกฉากหลัง / กด ESC
+  document.getElementById('rvBackdrop').addEventListener('click', (e)=>{
+    if(e.target.id === 'rvBackdrop') closeReview();
+  });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeReview(); });
+</script>
+</body>
+</html>

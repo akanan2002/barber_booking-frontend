@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title th:text="'รีวิวบริการ : ' + ${service}">รีวิวบริการ</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <style>
+    .wrap{max-width:960px;margin:24px auto;padding:0 16px}
+    .card{background:#fff;border:1px solid var(--border,#e5e7eb);border-radius:14px;padding:16px}
+    .row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+    .stars{font-size:18px;letter-spacing:2px;white-space:nowrap}
+    .stars.small{font-size:16px}
+    .muted{color:#6b7280}
+    .btn{background:#0B63F6;color:#fff;border:none;border-radius:10px;padding:8px 12px;text-decoration:none}
+
+    /* รายการรีวิว */
+    .list{margin-top:16px}
+    .item{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:14px 0;border-top:1px solid #eee}
+    .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .name{font-weight:700}
+    .comment{margin-top:6px;white-space:pre-wrap}
+    @media (max-width:640px){ .item{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+<header class="top-nav">
+  <a th:href="@{/home}" class="logo">Bar<span class="logo-accent">Ber</span>Shop</a>
+  <nav class="nav-center">
+    <a th:href="@{/home}">Home</a>
+    <a th:href="@{/reviews}" class="active">Reviews</a>
+  </nav>
+</header>
+
+<main class="wrap" th:with="avgInt=${T(java.lang.Math).round(avg)}">
+  <h2 style="font-weight:800;margin:8px 0" th:text="'รีวิว : ' + ${service}">รีวิว : บริการ</h2>
+
+  <!-- สรุปคะแนน -->
+  <section class="card row">
+    <div>
+      <div class="stars" aria-label="คะแนนเฉลี่ย">
+        <span th:each="i : ${#numbers.sequence(1,5)}"
+              th:text="${i <= avgInt} ? '★' : '☆'">★</span>
+      </div>
+      <div class="muted" style="margin-top:4px">
+        <span th:text="${#numbers.formatDecimal(avg,1,1)}">0.0</span>
+        จาก <span th:text="${count}">0</span> รีวิว
+      </div>
+    </div>
+    <div>
+      <a class="btn" th:href="@{/reviews}">← กลับหน้ารวม</a>
+    </div>
+  </section>
+
+  <!-- รายการรีวิว -->
+  <section class="card list">
+    <div th:if="${page.content.empty}">
+      <p class="muted">ยังไม่มีรีวิวสำหรับบริการนี้</p>
+    </div>
+
+    <div th:each="r : ${page.content}" class="item">
+      <!-- คอลัมน์ซ้าย: ดาวของรีวิวนั้น -->
+      <div>
+        <div class="stars small" aria-label="คะแนนรีวิว">
+          <span th:each="i : ${#numbers.sequence(1,5)}"
+                th:text="${i <= r.rating} ? '★' : '☆'">★</span>
+        </div>
+      </div>
+
+      <!-- คอลัมน์ขวา: ผู้ใช้/เวลา/คอมเมนต์ -->
+      <div>
+        <div class="meta">
+          <span class="name" th:text="${r.username}">username</span>
+          <span class="muted" th:if="${r.barber}" th:text="'ช่าง: ' + ${r.barber}">ช่าง</span>
+          <span class="muted"
+                th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm')}">—</span>
+        </div>
+
+        <div class="comment"
+             th:text="${#strings.isEmpty(r.comment) ? '— ไม่มีข้อความ —' : r.comment}">
+          — ไม่มีข้อความ —
+        </div>
+      </div>
+    </div>
+
+    <!-- เพจเนชัน -->
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px"
+         th:if="${page.totalPages > 1}">
+      <a class="btn" th:if="${!page.first}"
+         th:href="@{'/reviews/service/' + ${service} + '(?page=' + ${page.number} + ')'}">ก่อนหน้า</a>
+
+      <span class="muted" th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+
+      <a class="btn" th:if="${!page.last}"
+         th:href="@{'/reviews/service/' + ${service} + '(?page=' + ${page.number + 2} + ')'}">ถัดไป</a>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <a th:href="@{/profile}"><span class="ico">👤</span><span>โปรไฟล์</span></a>
+  <a th:href="@{/reviews}" class="active"><span class="ico">⭐</span><span>รีวิว</span></a>
+  <a th:href="@{/all-bookings}"><span class="ico">📋</span><span>ประวัติ</span></a>
+</nav>
+</body>
+</html>

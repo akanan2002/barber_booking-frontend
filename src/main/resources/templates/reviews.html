@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>รีวิวทั้งหมด</title>
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <style>
+    .wrap{max-width:900px;margin:16px auto 96px;padding:0 16px}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;justify-content:space-between;align-items:center}
+    .stars{color:#f5b301}
+    .muted{color:#667085}
+    @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+    .btn{background:#0B63F6;color:#fff;border-radius:12px;padding:8px 12px;text-decoration:none;font-weight:700}
+  </style>
+</head>
+<body>
+<header class="top-nav">
+  <a th:href="@{/home}" class="logo">Bar<span class="logo-accent">Ber</span>Shop</a>
+  <nav class="nav-center">
+    <a th:href="@{/home}">Home</a>
+    <a th:href="@{/reviews}" class="active">Reviews</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <h2 style="font-weight:800">รีวิวรวมตามบริการ</h2>
+
+  <div th:if="${#lists.isEmpty(summaries)}" class="muted" style="margin-top:12px">ยังไม่มีรีวิว</div>
+
+  <div class="grid" th:if="${!#lists.isEmpty(summaries)}">
+    <div class="card" th:each="s : ${summaries}">
+      <div>
+        <div style="font-weight:800" th:text="${s.service}">ตัดผม</div>
+        <div class="stars" aria-hidden="true">
+          <span th:each="i : ${#numbers.sequence(1, s.avgInt)}">★</span>
+          <span th:each="i : ${#numbers.sequence(1, 5 - s.avgInt)}" style="color:#ddd">★</span>
+        </div>
+        <div class="muted" th:text="${#numbers.formatDecimal(s.avg, 1, 1)} + ' จาก ' + ${s.count} + ' รีวิว'">4.3 จาก 10 รีวิว</div>
+      </div>
+      <a class="btn" th:href="@{/reviews/service/{name}(name=${s.service})}">ดูรีวิว</a>
+    </div>
+  </div>
+</main>
+
+<nav class="bottom-nav" aria-label="เมนูด้านล่าง">
+  <a th:href="@{/profile}"><span class="ico">👤</span><span>โปรไฟล์</span></a>
+  <a th:href="@{/reviews}" class="active"><span class="ico">⭐</span><span>รีวิว</span></a>
+  <a th:href="@{/all-bookings}"><span class="ico">📋</span><span>ประวัติการจองคิว</span></a>
+</nav>
+</body>
+</html>

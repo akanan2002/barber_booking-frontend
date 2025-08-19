@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>รายละเอียดการจอง</title>
+
+  <!-- CSRF (สำหรับ Spring Security) -->
+  <meta name="_csrf"        th:content="${_csrf != null ? _csrf.token      : ''}" />
+  <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}" />
+
+  <!-- สไตล์หลักของโปรเจกต์ -->
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+
+  <!-- สไตล์เฉพาะหน้านี้ (scoped) -->
+  <style>
+    .booking-detail-wrap { max-width: 900px; margin: 16px auto 96px; padding: 0 16px; }
+    .booking-detail-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 16px 0; }
+    .booking-detail-title { font-size: clamp(1.2rem, 3vw, 1.6rem); font-weight: 800; }
+    .booking-detail-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top: 12px; }
+    .booking-detail-item { background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; }
+    .booking-detail-label { color: var(--muted); font-size:.9rem; margin-bottom:6px; display:block; }
+    .booking-detail-value { font-weight:600; }
+    .booking-detail-note { white-space: pre-wrap; }
+    .booking-detail-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+    @media (max-width: 680px){ .booking-detail-grid { grid-template-columns: 1fr; } }
+
+    /* ป้ายสถานะ */
+    .badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; background:#f3f4f6; color:#374151; }
+    .badge-wait { background:#fff7ed; color:#c2410c; }
+    .badge-ok   { background:#e8f5e9; color:#15803d; }
+    .badge-cxl  { background:#fee2e2; color:#b91c1c; }
+
+    /* ปุ่ม */
+    .btn{ appearance:none; border:none; cursor:pointer; border-radius:12px; padding:10px 14px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:6px }
+    .btn-gray{ background:#e5e7eb; color:#111 }
+    .btn-primary{ background:#0B63F6; color:#fff }
+    .btn-green{ background:#16a34a; color:#fff }
+    .btn-red{ background:#ef4444; color:#fff }
+
+    /* Modal */
+    .modal-backdrop{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.45); padding:16px; z-index:1000 }
+    .modal{ width:100%; max-width:420px; background:#fff; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.15); padding:16px; }
+    .modal header{ font-weight:800; margin-bottom:8px; font-size:18px }
+    .modal .row{ display:flex; gap:8px; justify-content:flex-end; margin-top:14px }
+    .modal label{ font-size:.9rem; color:#555; display:block; margin:10px 0 4px }
+    .modal input{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px }
+
+    /* Stars (write) */
+    .stars{ display:inline-flex; flex-direction:row-reverse; gap:6px }
+    .stars input{ display:none }
+    .stars label{ font-size:30px; cursor:pointer; color:#ddd; line-height:1; user-select:none; transition:color .12s ease }
+    .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label{ color:#f5b301 }
+  </style>
+</head>
+<body th:with="page='booking'">
+
+<header class="top-nav">
+  <a th:href="@{/home}" class="logo">Bar<span class="logo-accent">Ber</span>Shop</a>
+  <nav class="nav-center">
+    <a th:href="@{/home}">Home</a>
+    <a th:href="@{/select_service}" class="active">Booking</a>
+  </nav>
+</header>
+
+<main class="booking-detail-wrap"
+      th:object="${booking}"
+      th:attr="data-id=*{id}, data-status=*{status}, data-date=*{date}, data-time=*{time},
+               data-service=*{service}, data-barber=*{barber}">
+  <!-- หัวเรื่อง -->
+  <div class="booking-detail-head">
+    <div class="booking-detail-title">
+      รายละเอียดการจอง
+      <small style="font-weight:700; color:#555;">#<span th:text="*{id}">0</span></small>
+    </div>
+
+    <!-- ป้ายสถานะ -->
+    <div id="statusBadge">
+      <span th:if="*{status} == 'รอดำเนินการ'" class="badge badge-wait">รอดำเนินการ</span>
+      <span th:if="*{status} == 'ยืนยันแล้ว' or *{status} == 'เสร็จสิ้น'"
+            class="badge badge-ok" th:text="*{status}">ยืนยันแล้ว</span>
+      <span th:if="*{status} == 'ยกเลิก'" class="badge badge-cxl">ยกเลิก</span>
+      <span th:if="*{status} != 'รอดำเนินการ' and *{status} != 'ยืนยันแล้ว' and *{status} != 'เสร็จสิ้น' and *{status} != 'ยกเลิก'"
+            class="badge" th:text="*{status}">สถานะอื่น</span>
+    </div>
+  </div>
+
+  <!-- รายละเอียดหลัก -->
+  <section class="booking-detail-grid">
+    <div class="booking-detail-item">
+      <span class="booking-detail-label">บริการ</span>
+      <div class="booking-detail-value" th:text="*{service}">ตัดผม</div>
+    </div>
+
+    <div class="booking-detail-item">
+      <span class="booking-detail-label">ช่างผู้ให้บริการ</span>
+      <div class="booking-detail-value" th:text="*{barber}">Barber A</div>
+    </div>
+
+    <div class="booking-detail-item">
+      <span class="booking-detail-label">วันนัดหมาย</span>
+      <div id="valDate" class="booking-detail-value"
+           th:text="${#temporals.format(booking.date, 'dd/MM/yyyy')}">08/08/2025</div>
+    </div>
+
+    <div class="booking-detail-item">
+      <span class="booking-detail-label">เวลา</span>
+      <!-- time เก็บเป็น String ก็แสดงตรง ๆ ได้ปลอดภัย -->
+      <div id="valTime" class="booking-detail-value" th:text="*{time} + ' น.'">14:30 น.</div>
+    </div>
+
+    <div class="booking-detail-item">
+      <span class="booking-detail-label">ผู้จอง (username)</span>
+      <div class="booking-detail-value" th:text="*{username}">guest</div>
+    </div>
+
+    <div class="booking-detail-item">
+      <span class="booking-detail-label">หมายเหตุ</span>
+      <div class="booking-detail-value booking-detail-note"
+           th:with="n=*{note}"
+           th:text="${#strings.isEmpty(n) ? '—' : n}">—</div>
+    </div>
+  </section>
+
+  <!-- ปุ่มการทำงาน -->
+  <div class="booking-detail-actions">
+    <a class="btn btn-gray" th:href="@{/all-bookings}">ย้อนกลับ</a>
+
+    <!-- แก้ไขเวลา / เสร็จสิ้น / ยกเลิก : ซ่อนเมื่อยกเลิกหรือเสร็จสิ้นแล้ว -->
+    <button class="btn btn-primary"
+            th:if="*{status} != 'ยกเลิก' and *{status} != 'เสร็จสิ้น'"
+            type="button" onclick="openReschedule()">แก้ไขวันเวลา</button>
+
+    <button class="btn btn-green"
+            th:if="*{status} != 'ยกเลิก' and *{status} != 'เสร็จสิ้น'"
+            type="button" onclick="markDone()">เสร็จสิ้น</button>
+
+    <button class="btn btn-red"
+            th:if="*{status} != 'ยกเลิก' and *{status} != 'เสร็จสิ้น'"
+            type="button" onclick="cancelBooking()">ยกเลิก</button>
+
+    <!-- ให้รีวิว: แสดงเฉพาะ “เสร็จสิ้น” และยังไม่เคยรีวิว -->
+    <button class="btn btn-primary"
+            th:if="*{status} == 'เสร็จสิ้น' and !${isReviewed}"
+            type="button" onclick="openReview()">ให้รีวิว</button>
+
+    <!-- ถ้ารีวิวแล้วโชว์ badge แทนปุ่ม -->
+    <span class="badge badge-ok"
+          th:if="*{status} == 'เสร็จสิ้น' and ${isReviewed}">รีวิวแล้ว</span>
+  </div>
+</main>
+
+<!-- Modal: Reschedule -->
+<div id="rsBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rsTitle">
+  <div class="modal">
+    <header id="rsTitle">แก้ไขวันและเวลา</header>
+
+    <label for="rsDate">วันนัดหมาย</label>
+    <input id="rsDate" type="date"/>
+
+    <label for="rsTime">เวลา</label>
+    <input id="rsTime" type="time"/>
+
+    <div class="row">
+      <button class="btn btn-gray" type="button" onclick="closeReschedule()">ยกเลิก</button>
+      <button class="btn btn-primary" type="button" onclick="submitReschedule()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Review -->
+<div id="rvBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+  <div class="modal">
+    <header id="rvTitle">ให้คะแนนบริการ</header>
+    <div id="rvInfo" class="booking-detail-label" style="margin-bottom:6px">—</div>
+
+    <div class="stars" role="radiogroup" aria-label="ให้คะแนนเป็นดาว">
+      <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+      <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+      <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+      <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+      <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+    </div>
+
+    <label for="rvComment">คอมเมนต์ (ไม่บังคับ)</label>
+    <textarea id="rvComment" rows="3" placeholder="เล่าประสบการณ์ของคุณ..."
+              style="width:100%; border:1px solid var(--border); border-radius:10px; padding:10px"></textarea>
+
+    <div class="row">
+      <button class="btn btn-gray" type="button" onclick="closeReview()">ยกเลิก</button>
+      <button class="btn btn-primary" type="button" onclick="submitReview()">ส่งรีวิว</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom nav (เดิม) -->
+<nav class="bottom-nav" aria-label="เมนูด้านล่าง">
+  <a th:href="@{/profile}"><span class="ico">👤</span><span>โปรไฟล์</span></a>
+  <a th:href="@{/select_service}"><span class="ico">✂️</span><span>จอง</span></a>
+  <a th:href="@{/all-bookings}" class="active"><span class="ico">📋</span><span>ประวัติการจองคิว</span></a>
+</nav>
+
+<!-- JS -->
+<script th:inline="javascript">
+  const API_BASE = /*[[@{/api/bookings}]]*/ '/api/bookings';
+
+  // อ่านค่าจาก DOM
+  const root = document.querySelector('main.booking-detail-wrap');
+  const BOOKING_ID = Number(root.dataset.id);
+
+  // CSRF
+  const CSRF_TOKEN = document.querySelector('meta[name="_csrf"]')?.content;
+  const CSRF_HEADER = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+  function headersJSON() {
+    const h = { 'Content-Type': 'application/json' };
+    if (CSRF_TOKEN && CSRF_HEADER) h[CSRF_HEADER] = CSRF_TOKEN;
+    return h;
+  }
+
+  /* ---------- เสร็จสิ้น / ยกเลิก ---------- */
+  async function patchStatus(newStatus){
+    try{
+      const res = await fetch(`${API_BASE}/${BOOKING_ID}/status`, {
+        method:'PATCH',
+        headers: headersJSON(),
+        body: JSON.stringify({ status: newStatus })
+      });
+      if(!res.ok){
+        const msg = await (async()=>{ try{ return await res.text(); }catch{ return res.status + ' ' + res.statusText; }})();
+        alert('อัปเดตสถานะไม่สำเร็จ: ' + msg);
+        return;
+      }
+      location.reload(); // รีเฟรชเพื่ออัปเดตปุ่ม/ป้าย
+    }catch(err){
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    }
+  }
+  function markDone(){ if(confirm('ยืนยันทำรายการนี้เป็น “เสร็จสิ้น”?')) patchStatus('เสร็จสิ้น'); }
+  function cancelBooking(){ if(confirm('ยืนยันยกเลิกรายการนี้?')) patchStatus('ยกเลิก'); }
+
+  /* ---------- Reschedule ---------- */
+  const rsBackdrop = document.getElementById('rsBackdrop');
+  const rsDate = document.getElementById('rsDate');
+  const rsTime = document.getElementById('rsTime');
+
+  function openReschedule(){
+    const d = root.dataset.date; // YYYY-MM-DD
+    const t = root.dataset.time; // HH:mm
+    if(d) rsDate.value = d;
+    if(t) rsTime.value = t.length > 5 ? t.slice(0,5) : t;
+    rsBackdrop.style.display = 'flex';
+  }
+  function closeReschedule(){ rsBackdrop.style.display = 'none'; }
+
+  async function submitReschedule(){
+    const d = rsDate.value;
+    const t = rsTime.value;
+    if(!d || !t){ alert('กรุณาเลือกวันและเวลาให้ครบ'); return; }
+    try{
+      const res = await fetch(`${API_BASE}/${BOOKING_ID}/time`, {
+        method:'PATCH',
+        headers: headersJSON(),
+        body: JSON.stringify({ date: d, time: t })
+      });
+      if(!res.ok){
+        const msg = await (async()=>{ try{ return await res.text(); }catch{ return res.status + ' ' + res.statusText; }})();
+        alert('แก้ไขวันเวลาไม่สำเร็จ: ' + msg);
+        return;
+      }
+      closeReschedule();
+      location.reload();
+    }catch(e){
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    }
+  }
+
+  // ปิดโมดัลเมื่อคลิกฉากหลัง / กด ESC
+  rsBackdrop.addEventListener('click', (e)=>{ if(e.target.id === 'rsBackdrop') closeReschedule(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeReschedule(); });
+
+  /* ---------- Review ---------- */
+  const POST_REVIEW_URL = /*[[@{/api/reviews}]]*/ '/api/reviews';
+
+  function openReview(){
+    const svc = root.dataset.service || '';
+    const barber = root.dataset.barber || '';
+    document.getElementById('rvInfo').textContent =
+      `บริการ: ${svc}${barber ? ' • ช่าง: ' + barber : ''}`;
+
+    document.querySelectorAll('input[name=rating]').forEach(i=>i.checked=false);
+    document.getElementById('rvComment').value = '';
+    document.getElementById('rvBackdrop').style.display = 'flex';
+  }
+  function closeReview(){ document.getElementById('rvBackdrop').style.display = 'none'; }
+
+  async function submitReview(){
+    const rating = Number(document.querySelector('input[name=rating]:checked')?.value);
+    if(!rating){ alert('กรุณาให้คะแนนเป็นจำนวนดาว'); return; }
+    const comment = document.getElementById('rvComment').value.trim();
+
+    const payload = { bookingId: BOOKING_ID, rating, comment };
+
+    try{
+      const res = await fetch(POST_REVIEW_URL, {
+        method:'POST',
+        headers: headersJSON(),
+        body: JSON.stringify(payload)
+      });
+      if(res.ok){
+        closeReview();
+        // แทนปุ่ม "ให้รีวิว" ด้วยป้าย "รีวิวแล้ว" โดยไม่รีเฟรชทั้งหน้า
+        const btn = document.querySelector('button[onclick="openReview()"]');
+        if(btn){ btn.outerHTML = '<span class="badge badge-ok">รีวิวแล้ว</span>'; }
+        alert('ขอบคุณสำหรับรีวิว!');
+      }else{
+        const msg = await (async()=>{ try{ return await res.text(); }catch{ return res.status + " " + res.statusText; }})();
+        alert('ส่งรีวิวไม่สำเร็จ: ' + msg);
+      }
+    }catch(e){
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    }
+  }
+
+  // ปิดโมดัลรีวิวเมื่อคลิกฉากหลัง / กด ESC
+  document.getElementById('rvBackdrop').addEventListener('click', (e)=>{
+    if(e.target.id === 'rvBackdrop') closeReview();
+  });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeReview(); });
+</script>
+</body>
+</html>

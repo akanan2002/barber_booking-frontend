@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+  <head><meta charset="utf-8"></head><head></head><body>
+  <!-- TOP BAR -->
+  <div th:fragment="topbar">
+    <header class="topbar">
+      <a th:href="@{/home}" class="logo"><span>Bar</span>BerShop</a>
+
+      <nav class="tabs">
+        <a th:href="@{/home}" th:classappend="${page}=='home' ? ' active'">Home</a>
+        <a th:href="@{/select_service}" th:classappend="${page}=='booking' ? ' active'">Booking</a>
+      </nav>
+
+      <div class="right">
+        <a th:href="@{/profile}" class="link">โปรไฟล์</a>
+        <a th:href="@{/all-bookings}" class="link">ประวัติการจอง</a>
+        <form th:action="@{/logout}" method="post" style="margin:0">
+          <button type="submit" class="btn-logout">Logout</button>
+        </form>
+      </div>
+    </header>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div th:fragment="bottomnav">
+    <nav class="bottomnav">
+      <a th:href="@{/profile}" th:classappend="${page}=='profile'  ? ' active'">
+        <span class="ico">👤</span><span>โปรไฟล์</span>
+      </a>
+      <a th:href="@{/select_service}" th:classappend="${page}=='booking'  ? ' active'">
+        <span class="ico">✂️</span><span>จอง</span>
+      </a>
+      <a th:href="@{/all-bookings}" th:classappend="${page}=='history'  ? ' active'">
+        <span class="ico">📋</span><span>ประวัติการจอง</span>
+      </a>
+    </nav>
+  </div>
+
+
+</body></html>

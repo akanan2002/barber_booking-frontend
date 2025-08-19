@@ -1,0 +1,129 @@
+/* =========================
+   Base & Design Tokens
+   ========================= */
+   :root{
+    --primary: #0B63F6;
+    --primary-hover: #0747ad;
+    --primary-ink: #1e40af;      /* สีตัวอักษรเมื่อ active/hover */
+    --bg: #f7f7f8;               /* เดิมคอมเมนต์ไว้ → เปิดใช้งาน */
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --ink: #111111;
+    --muted: #6b7280;
+  }
+  
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Prompt', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height:1.5;
+  }
+  
+  /* Utils */
+  a{ color:inherit; }
+  .hidden{ display:none !important; }
+  .text-muted{ color:var(--muted); }
+  
+  /* =========================
+     Header (Top Navigation)
+     ========================= */
+  .top-nav{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 16px; background:#fff; border-bottom:1px solid var(--border);
+  }
+  
+  .logo{
+    font-weight:800; font-size:20px;
+    text-decoration:none; color:var(--ink);
+  }
+  .logo span{ color:var(--primary); }
+  /* รองรับโลโก้แบบมีตัวเน้นสีแดง: <span class="logo-accent">Ber</span> */
+  .logo .logo-accent{ color:#D33F2F; margin-left:.25rem; }
+  
+  .nav-center a{
+    margin:0 8px; padding:8px 10px;
+    border-radius:10px; text-decoration:none; color:var(--ink);
+    transition:background-color .15s ease, color .15s ease;
+  }
+  .nav-center a:hover{ background:#eef4ff; color:var(--primary-ink); }
+  .nav-center a.active{ background:#eef4ff; color:var(--primary-ink); font-weight:700; }
+  
+  /* ไอคอนและปุ่มด้านขวา */
+  .header-actions{ display:flex; align-items:center; gap:10px; }
+  .icon-btn{
+    display:inline-flex; width:36px; height:36px; align-items:center; justify-content:center;
+    border-radius:999px; background:#f2f4f7; color:var(--ink); text-decoration:none;
+    transition:background-color .15s ease, color .15s ease;
+  }
+  .icon-btn:hover{ background:#e6e8ec; color:var(--primary-ink); }
+  
+  .btn-logout{
+    border:0; padding:8px 12px; border-radius:10px;
+    background:#ef4444; color:#fff; font-weight:700; cursor:pointer;
+    transition:filter .15s ease, background-color .15s ease;
+  }
+  .btn-logout:hover{ background:#dc2626; }
+  .logout-inline{ display:inline; }
+  
+  /* =========================
+     Buttons (shared)
+     ========================= */
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 14px; border:0; border-radius:12px;
+    font-weight:700; cursor:pointer; user-select:none;
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    box-shadow:0 6px 14px rgba(0,0,0,.08);
+  }
+  .btn i{ font-size:16px; }
+  
+  .btn-danger{ color:#fff; background:linear-gradient(135deg,#ef4444,#dc2626); }
+  .btn-danger:hover{ transform:translateY(-1px); box-shadow:0 10px 20px rgba(239,68,68,.35); }
+  .btn-danger:active{ transform:translateY(0); filter:brightness(.95); }
+  .btn-danger:focus{ outline:2px solid rgba(239,68,68,.35); outline-offset:2px; }
+  
+  /* =========================
+     Bottom Navigation (Mobile)
+     ========================= */
+  .bottom-nav{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    display:flex; justify-content:space-around; gap:8px;
+    padding:8px 10px; background:#fff; border-top:1px solid var(--border);
+  }
+  .bottom-nav a{
+    text-decoration:none; color:var(--ink);
+    display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px;
+  }
+  .bottom-nav i{ font-size:16px; }
+  /* .bottom-nav a.active{ color:var(--primary-ink); background:#fff; border-radius:10px; padding:4px 8px; } */
+  @media (min-width:768px){ .bottom-nav{ display:none; } }
+  
+  /* =========================
+     Badges (ใช้ในประวัติการจอง)
+     ========================= */
+  .badge{
+    display:inline-block; padding:4px 10px; border-radius:999px;
+    font-size:12px; background:#f3f4f6; color:#374151;
+  }
+  .badge-success{ background:#e8f5e9; color:#15803d; }
+  .badge-cancel{ background:#fee2e2; color:#b91c1c; }
+  
+  /* =========================
+     Cards & Containers (ทั่วไป)
+     ========================= */
+  .container{ max-width:1100px; margin:0 auto; padding:0 16px; }
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    box-shadow:0 10px 24px rgba(0,0,0,.06);
+  }
+  
+  /* =========================
+     Link focus (accessibility)
+     ========================= */
+  a:focus-visible, button:focus-visible{
+    outline:2px solid #93c5fd; outline-offset:2px;
+  }
+  

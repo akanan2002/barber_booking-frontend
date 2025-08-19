@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BarBerShop Home</title>
+  <link rel="stylesheet" th:href="@{/css/home.css}">
+  <link rel="stylesheet" th:href="@{/css/main.css}">  
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  crossorigin="anonymous" referrerpolicy="no-referrer">
+
+
+</head>
+<body th:with="page='home'">
+
+  <!-- Header -->
+<header class="top-nav">
+  <div class="nav-left">
+    <a th:href="@{/home}" class="logo">Bar<span class="logo-accent">Ber</span>Shop</a>
+  </div>
+
+  <div class="nav-center">
+    <a th:href="@{/home}"           th:classappend="${page}=='home' ? 'active' : ''">Home</a>
+    <a th:href="@{/select_service}" th:classappend="${page}=='booking' ? 'active' : ''">Booking</a>
+  </div>
+
+  <div class="header-actions">
+    <a th:href="@{/all-bookings}" class="icon-btn" title="ประวัติการจอง">
+      <i class="fa-regular fa-calendar"></i>
+    </a>
+    <a th:href="@{/profile}" class="icon-btn" title="โปรไฟล์">
+      <i class="fa-solid fa-user"></i>
+    </a>
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <button type="submit" class="btn-logout">Logout</button>
+    </form>
+  </div>
+</header>
+
+  
+
+  <!-- Hero -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="left-section">
+        <p><strong>WELCOME TO</strong></p>
+        <h1>BarBerShop in<br>ThaiLand</h1>
+        <p>📍 254 W 27ST ST, NEW YORK, NY 10011</p>
+        <p>📞 (212) 123–4567</p>
+        <p>📍 341 W 11ST ST, NEW YORK, NY 10022</p>
+        <p>📞 (212) 123–4567</p>
+        <a class="btn-book" th:href="@{/select_service}">บริการทั้งหมด</a>
+      </div>
+
+      <div class="right-section">
+        <img th:src="@{/images/photo4.png}" alt="home">
+      </div>
+    </div>
+  </section>
+  
+
+  <!-- Services (shortcuts) -->
+  <section class="services-section">
+    <div class="services-list">
+      <div class="service-item">
+        <span>✂️</span>
+        <p>ตัดผมปกติ</p>
+        <a class="btn-primary" th:href="@{/booking/select-time(service='ตัดผม')}">MORE</a>
+      </div>
+      <div class="service-item">
+        <span>🪒</span>
+        <p>โกนหนวด</p>
+        <a class="btn-primary" th:href="@{/booking/select-time(service='โกนหนวด')}">MORE</a>
+      </div>
+      <div class="service-item">
+        <span>🎨</span>
+        <p>ทำสีผม</p>
+        <a class="btn-primary" th:href="@{/booking/select-time(service='ทำสีผม')}">MORE</a>
+      </div>
+      <div class="service-item">
+        <span>👦</span>
+        <p>ตัดผมเด็ก</p>
+        <a class="btn-primary" th:href="@{/booking/select-time(service='ตัดผมเด็ก')}">MORE</a>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

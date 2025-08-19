@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard | Booking Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f5f7fb;--fg:#2c3e50;--card:#fff;--muted:#6b7280;
+      --primary:#2e7dff;--danger:#e74c3c;--warn:#f39c12;--ok:#2ecc71;--dark:#111827;
+      --border:#dde3ea;--row:#eef2f7
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Prompt',system-ui,-apple-system,Segoe UI,Roboto,'TH Sarabun New',sans-serif;background:var(--bg);margin:0;color:var(--fg)}
+    .container{max-width:1200px;margin:0 auto;padding:28px 20px 40px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{margin:0;font-size:26px}
+    .top-actions{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:14px}
+    .logout-btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer}
+    .filters{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+    select,input[type="date"],input[type="text"],button{padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card)}
+    input[type="text"],select,input[type="date"]{min-height:38px}
+    button{cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff;border:none}
+    .btn-secondary{background:#95a5a6;color:#fff;border:none}
+    .btn-danger{background:var(--danger);color:#fff;border:none}
+    .btn-warning{background:var(--warn);color:#fff;border:none}
+    .btn-success{background:var(--ok);color:#fff;border:none}
+    .summary{margin:8px 0 14px;color:var(--muted);font-size:14px}
+    table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden}
+    th,td{padding:12px 14px;border-bottom:1px solid var(--row);text-align:left}
+    th{background:var(--dark);color:#fff;font-weight:600}
+    tr:hover td{background:#fafcff}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .badge{padding:6px 10px;border-radius:999px;font-size:12px;white-space:nowrap}
+    .badge-pending{background:#f1c40f;color:#222}
+    .badge-confirm{background:#3498db;color:#fff}
+    .badge-cancel{background:#e74c3c;color:#fff}
+    .badge-done{background:#2ecc71;color:#fff}
+    .right{margin-left:auto}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Admin Dashboard | Booking Management</h1>
+      <div class="top-actions">
+        <!-- ปลอดภัย: ถ้าไม่มี request จะโชว์ 'admin' -->
+        <span>สวัสดี, <strong th:text="${#httpServletRequest != null ? #httpServletRequest.remoteUser : 'admin'}">admin</strong></span>
+        <form th:action="@{/logout}" method="post" style="display:inline;"
+        onsubmit="return confirm('ออกจากระบบผู้ดูแลหรือไม่?')">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+    <button type="submit" class="btn btn-danger btn-sm">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+  </form>
+      </div>
+    </header>
+    
+
+    <div class="filters" role="group" aria-label="ตัวกรองข้อมูล">
+      <select id="statusFilter" aria-label="เลือกสถานะ">
+        <option value="">ทั้งหมด</option>
+        <option value="รอดำเนินการ">รอดำเนินการ</option>
+        <option value="ยืนยันแล้ว">ยืนยันแล้ว</option>
+        <option value="ยกเลิก">ยกเลิก</option>
+        <option value="เสร็จสิ้น">เสร็จสิ้น</option>
+      </select>
+
+      <input id="date" type="date" aria-label="วันที่เดียว" />
+      <span aria-hidden="true">ตั้งแต่</span>
+      <input id="startDate" type="date" aria-label="เริ่มวันที่" />
+      <span aria-hidden="true">ถึง</span>
+      <input id="endDate" type="date" aria-label="สิ้นสุดวันที่" />
+      <input id="q" type="text" placeholder="ค้นหา: ID / User / Service / Barber / Note" aria-label="ค้นหา" />
+
+      <button class="btn-primary" onclick="loadBookings()">กรอง</button>
+      <button class="btn-secondary" onclick="resetFilters()">ล้างตัวกรอง</button>
+      <button class="btn-primary right" onclick="exportCsv()">Export CSV</button>
+    </div>
+
+    <div class="summary">
+      แสดงผล <span id="count">0</span> รายการ
+      <span id="hint" style="display:none">…กำลังโหลด</span>
+    </div>
+
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Service</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Barber</th>
+        <th>Status</th>
+        <th>Note</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody id="bookingTableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const apiUrl = '/api/admin/bookings';
+
+    function renderStatusBadge(status) {
+      if (status === 'รอดำเนินการ') return '<span class="badge badge-pending">รอดำเนินการ</span>';
+      if (status === 'ยืนยันแล้ว')   return '<span class="badge badge-confirm">ยืนยันแล้ว</span>';
+      if (status === 'ยกเลิก')       return '<span class="badge badge-cancel">ยกเลิก</span>';
+      if (status === 'เสร็จสิ้น')     return '<span class="badge badge-done">เสร็จสิ้น</span>';
+      return status || '-';
+    }
+
+    function buildQuery() {
+      const p = new URLSearchParams();
+      const status = document.getElementById('statusFilter').value;
+      const date = document.getElementById('date').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const q = document.getElementById('q').value.trim();
+
+      if (status) p.append('status', status);
+      if (date) p.append('date', date);
+      if (startDate) p.append('startDate', startDate);
+      if (endDate) p.append('endDate', endDate);
+      if (q) p.append('q', q);
+
+      const qs = p.toString();
+      return qs ? `${apiUrl}?${qs}` : apiUrl;
+    }
+
+    async function loadBookings() {
+      const hint = document.getElementById('hint');
+      const count = document.getElementById('count');
+      const tbody = document.getElementById('bookingTableBody');
+      hint.style.display = 'inline';
+      tbody.innerHTML = '';
+
+      try {
+        const url = buildQuery();
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        count.textContent = data.length;
+
+        data.forEach(b => {
+          const actions = [];
+          if (b.status !== 'ยืนยันแล้ว' && b.status !== 'เสร็จสิ้น' && b.status !== 'ยกเลิก') {
+            actions.push(`<button class="btn-primary" onclick="setStatus(${b.id}, 'ยืนยันแล้ว')">ยืนยัน</button>`);
+          }
+          if (b.status !== 'ยกเลิก' && b.status !== 'เสร็จสิ้น') {
+            actions.push(`<button class="btn-warning" onclick="setStatus(${b.id}, 'ยกเลิก')">ยกเลิก</button>`);
+          }
+          if (b.status !== 'เสร็จสิ้น') {
+            actions.push(`<button class="btn-success" onclick="setStatus(${b.id}, 'เสร็จสิ้น')">เสร็จสิ้น</button>`);
+          }
+          actions.push(`<button class="btn-danger" onclick="deleteBooking(${b.id})">ลบ</button>`);
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${b.id}</td>
+            <td>${b.username || '-'}</td>
+            <td>${b.service || '-'}</td>
+            <td>${b.date || '-'}</td>
+            <td>${b.time || '-'}</td>
+            <td>${b.barber || '-'}</td>
+            <td>${renderStatusBadge(b.status)}</td>
+            <td>${b.note || '-'}</td>
+            <td><div class="actions">${actions.join(' ')}</div></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        count.textContent = 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td colspan="9">โหลดข้อมูลล้มเหลว: ${e.message}</td>`;
+        tbody.appendChild(tr);
+      } finally {
+        hint.style.display = 'none';
+      }
+    }
+
+    async function setStatus(id, status) {
+      if (!confirm(`ยืนยันเปลี่ยนสถานะเป็น "${status}" ?`)) return;
+      const res = await fetch(`${apiUrl}/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        loadBookings();
+      } else {
+        let msg = 'อัปเดตสถานะไม่สำเร็จ';
+        try { const j = await res.json(); if (j.message) msg = j.message; } catch {}
+        alert(msg);
+      }
+    }
+
+    async function deleteBooking(id) {
+      if (!confirm(`ลบการจอง ID ${id}?`)) return;
+      const res = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+      if (res.ok) loadBookings();
+      else alert('ลบไม่สำเร็จ');
+    }
+
+    function resetFilters() {
+      document.getElementById('statusFilter').value = '';
+      document.getElementById('date').value = '';
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
+      document.getElementById('q').value = '';
+      loadBookings();
+    }
+
+    async function exportCsv() {
+      const url = buildQuery().replace(apiUrl, `${apiUrl}/export`);
+      window.location.href = url;
+    }
+
+    // Enter เพื่อค้นหาเร็ว ๆ
+    document.getElementById('q').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadBookings();
+    });
+
+    // init
+    loadBookings();
+  </script>
+</body>
+</html>

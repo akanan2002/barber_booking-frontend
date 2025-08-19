@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>ยืนยันการจอง</title>
+  <link rel="stylesheet" th:href="@{/css/booking.css}" />
+  <link rel="stylesheet" th:href="@{/css/main.css}" />
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- Header -->
+<header class="top-nav">
+  <div class="nav-left">
+    <div class="logo">Bar<span>Ber</span>Shop</div>
+  </div>
+  <div class="nav-center">
+    <a th:href="@{/home}">Home</a>
+    <a th:href="@{/select_service}" class="active">Booking</a>
+  </div>
+  <div class="header-actions">
+    <a href="/profile" class="icon-btn"><i class="fa fa-user"></i></a>
+    <form th:action="@{/logout}" method="post" style="display:inline;">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <button type="submit" class="btn-logout">Logout</button>
+    </form>
+    
+  </div>
+</header>
+
+<!-- Step Indicator -->
+<div class="step-indicator">
+  <div class="step">1</div>
+  <div class="step">2</div>
+  <div class="step active">3</div>
+  <div class="step">4</div>
+</div>
+
+<!-- Main Container -->
+<div class="container" style="max-width: 700px; margin: auto; padding-bottom: 100px;">
+  <h2>ยืนยันข้อมูลการจอง</h2>
+
+  <div class="service-card">
+    <div class="service-info">
+      <p><strong>บริการ:</strong> <span th:text="${service}">บริการ</span></p>
+      <p><strong>วันที่:</strong> <span th:text="${date}">--</span></p>
+      <p><strong>เวลา:</strong> <span th:text="${time}">--</span></p>
+      <p><strong>ช่างที่เลือก:</strong> <span th:text="${barber}">--</span></p>
+      <p><strong>รายละเอียดเพิ่มเติม:</strong></p>
+      <div style="background: #f8f8f8; padding: 10px; border-radius: 6px; border: 1px solid #ddd;">
+        <span th:text="${note}">ไม่มีรายละเอียด</span>
+      </div>
+    </div>
+  </div>
+
+  <form action="/booking/submit" method="post" style="margin-top: 20px;">
+    <button type="submit" class="book-btn" style="padding: 10px 24px;">ยืนยันการจอง</button>
+    <a th:href="@{/booking/select-time(service=${service})}" class="btn-logout">ย้อนกลับ</a>
+  </form>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <a href="/profile"><i class="fa fa-user"></i>โปรไฟล์</a>
+  <a href="/booking"><i class="fa fa-calendar"></i>จอง</a>
+  <a href="/all-bookings"><i class="fa fa-list"></i>จองทั้งหมด</a>
+</div>
+
+</body>
+</html>

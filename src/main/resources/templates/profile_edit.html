@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>แก้ไขข้อมูลส่วนตัว</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+
+  <style>
+    .form-card{ max-width: 720px; margin: 24px auto; padding: 16px; }
+    .form-row{ margin-bottom: 12px; }
+    .form-row label{ display:block; font-weight:600; margin-bottom:6px; }
+    .form-row input{
+      width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px;
+      font: inherit;
+    }
+    .readonly{
+      background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px;
+      padding:10px 12px; color:#111;
+    }
+    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .err{ color:#b91c1c; font-size:.9rem; margin-top:6px; display:block; }
+    .actions{ display:flex; gap:10px; margin-top:12px; }
+    .btn-primary{
+      background:#0B63F6; color:#fff; border:0; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer;
+    }
+    .btn-ghost{ background:#e5e7eb; color:#111; border:0; border-radius:10px; padding:10px 14px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; }
+    @media (max-width:640px){ .grid-2{ grid-template-columns:1fr; } }
+  </style>
+</head>
+<body th:with="page='profile'">
+
+  <header class="top-nav">
+    <a th:href="@{/home}" class="logo">Bar<span class="logo-accent">Ber</span>Shop</a>
+    <nav class="nav-center">
+      <a th:href="@{/home}">Home</a>
+      <a th:href="@{/select_service}">Booking</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <h2 style="text-align:center; margin-top:16px;">แก้ไขข้อมูลส่วนตัว</h2>
+
+    <form th:action="@{/profile/edit}" method="post" th:object="${form}" class="card form-card" novalidate>
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+      <!-- ข้อมูลอ่านอย่างเดียว -->
+      <div class="grid-2" style="margin-bottom:12px;">
+        <div>
+          <label>ชื่อผู้ใช้</label>
+          <div class="readonly"
+          th:text="${user != null ? user.username : #authentication.name}">username
+        </div>
+        <div>
+          <label>วันที่สมัคร</label>
+          <div class="readonly"
+          th:text="${(user != null and user.createdAt != null) ? #temporals.format(user.createdAt,'dd/MM/yyyy') : '—'}">
+         dd/MM/yyyy
+        </div>
+      </div>
+
+      <!-- ฟิลด์แก้ไข -->
+      <div class="form-row">
+        <label for="fullName">ชื่อ-นามสกุล</label>
+        <input id="fullName" th:field="*{fullName}" autocomplete="name" placeholder="เช่น ตะโน๊ต">
+        <small class="err" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></small>
+      </div>
+
+      <div class="form-row">
+        <label for="email">อีเมล</label>
+        <input id="email" type="email" th:field="*{email}" autocomplete="email" placeholder="name@example.com">
+        <small class="err" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn-primary">บันทึก</button>
+        <a th:href="@{/profile}" class="btn-ghost">ยกเลิก</a>
+        <a th:href="@{/profile/password}" class="btn-ghost">เปลี่ยนรหัสผ่าน</a>
+      </div>
+
+      <!-- error รวมระดับฟอร์ม (ถ้ามี) -->
+      <small class="err" th:if="${#fields.hasGlobalErrors()}" th:each="e : ${#fields.globalErrors()}">[[${e}]]</small>
+    </form>
+  </div>
+
+</body>
+</html>

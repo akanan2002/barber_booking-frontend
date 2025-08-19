@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>เลือกบริการ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- global css -->
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <link rel="stylesheet" th:href="@{/css/booking.css}">
+  <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+
+
+  <style>
+    :root{
+      --primary:#007bff; --primary-hover:#0056b3;
+      --border:#e5e5e5; --muted:#6b7280; --card:#fff; --bg:#f7f7f8;
+      --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.08);
+      --gold:#f5b301; --star-muted:#ddd;
+    }
+    *{ box-sizing:border-box }
+    body{ margin:0; font-family:'Prompt', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:#111 }
+    .container{ max-width:900px; margin:24px auto 96px; padding:0 16px }
+
+    /* top nav */
+    .top-nav{ position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+              padding:10px 16px; background:#fff; border-bottom:1px solid var(--border) }
+    .logo{ font-weight:800; font-size:20px; text-decoration:none; color:#111 }
+    .logo span{ color:var(--primary) }
+    .nav-center a{ margin:0 8px; padding:8px 10px; border-radius:10px; text-decoration:none; color:#111 }
+    .nav-center a.active, .nav-center a:hover{ background:#eef4ff; color:#1e40af }
+    .header-actions{ display:flex; align-items:center; gap:10px }
+    .icon-btn{ display:inline-flex; width:36px; height:36px; align-items:center; justify-content:center;
+               border-radius:999px; background:#f2f4f7; color:#111; text-decoration:none; font-size:16px }
+    .btn-logout{ padding:8px 12px; border-radius:10px; background:#ef4444; color:#fff; border:0; cursor:pointer }
+    .btn-logout:hover{ background:#dc2626 }
+
+    /* steps */
+    .step-indicator{ display:flex; align-items:center; justify-content:center; gap:10px; margin:14px 0 6px }
+    .step{ width:32px; height:32px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+           background:#e5e7eb; color:#374151; font-weight:700; }
+    .step.active{ background:var(--primary); color:#fff }
+
+    /* cards */
+    .service-card{
+      display:grid; grid-template-columns: 120px 1fr auto; gap:14px;
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      padding:12px; box-shadow:var(--shadow);
+      margin-bottom:14px;
+    }
+    .service-card img{ width:120px; height:100px; object-fit:cover; border-radius:10px }
+    .service-info h3{ margin:0 0 6px 0 }
+    .service-info p{ margin:4px 0; color:#333 }
+    .price-range{ font-weight:700; }
+    .rating-row{ display:flex; align-items:center; gap:8px; margin-top:6px }
+    .rtxt{ color:var(--muted); font-size:13px }
+
+    /* read-only stars */
+    .stars-ro{ position:relative; display:inline-block; font-size:18px; line-height:1 }
+    .stars-ro::before{ content:"★★★★★"; color:var(--star-muted) }
+    .stars-ro > span{ position:absolute; left:0; top:0; overflow:hidden; width:0 }
+    .stars-ro > span::before{ content:"★★★★★"; color:var(--gold) }
+
+    .book-btn{
+      align-self:center; appearance:none; border:none; cursor:pointer;
+      background:var(--primary); color:#fff; padding:10px 14px; border-radius:12px;
+      font-weight:700; display:inline-flex; align-items:center; gap:8px;
+      transition:.15s;
+    }
+    .book-btn:hover{ background:var(--primary-hover) }
+
+/* bottom nav — ชิดและกึ่งกลางแบบหน้า home */
+.bottom-nav{
+  position:fixed; bottom:0; left:0; right:0; z-index:40;
+  display:flex; justify-content:center;
+  gap: clamp(18px, 7vw, 100px);      /* ระยะห่างระหว่างปุ่ม แบบพอดีทุกจอ */
+  background:#fff; border-top:1px solid var(--border);
+  padding:8px 12px;
+}
+.bottom-nav a{
+  text-decoration:none; color:#111;
+  display:flex; flex-direction:column; align-items:center; font-size:12px;
+}
+.bottom-nav .ico{ font-size:16px; margin-bottom:4px }
+
+
+    @media (max-width:640px){
+      .service-card{ grid-template-columns: 90px 1fr; }
+      .service-card form{ grid-column:1 / -1; }
+      .service-card img{ width:90px; height:90px }
+    }
+  </style>
+</head>
+<body th:with="page='booking'">
+
+  <!-- Header -->
+  <header class="top-nav">
+    <div class="nav-left">
+      <a th:href="@{/home}" class="logo">Bar<span class="logo-accent">Ber</span>Shop</a>
+    </div>
+
+    <nav class="nav-center">
+      <a th:href="@{/home}" th:classappend="${page}=='home' ? 'active' : ''">Home</a>
+      <a th:href="@{/select_service}" th:classappend="${page}=='booking' ? 'active' : ''">Booking</a>
+    </nav>
+
+    <div class="header-actions">
+      <a th:href="@{/all-bookings}" class="icon-btn" title="ประวัติการจอง">
+        <i class="fa-regular fa-calendar"></i>
+      </a>
+      <a th:href="@{/profile}" class="icon-btn" title="โปรไฟล์">
+        <i class="fa-solid fa-user"></i>
+      </a>
+      <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button type="submit" class="btn-logout">Logout</button>
+      </form>
+    </div>
+  </header>
+
+  <!-- Step Indicator -->
+  <div class="step-indicator" aria-label="ขั้นตอนการจอง">
+    <div class="step active" title="เลือกบริการ">1</div>
+    <div class="step" title="เลือกช่าง">2</div>
+    <div class="step" title="เลือกวันเวลา">3</div>
+    <div class="step" title="ยืนยัน">4</div>
+  </div>
+
+  <div class="container" style="padding-bottom: 100px;">
+    <!-- Service 1 -->
+    <div class="service-card">
+      <img th:src="@{/images/Cutting.jpg}" alt="ตัดผม" />
+      <div class="service-info">
+        <h3>ตัดผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿70–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ตัดผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองตัดผม">
+        <input type="hidden" name="service" value="ตัดผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 2 -->
+    <div class="service-card">
+      <img th:src="@{/images/Hair coloring.jpg}" alt="ทำสีผม" />
+      <div class="service-info">
+        <h3>ทำสีผม (แฟชั่น)</h3>
+        <p>เลือกสีสันที่โดดเด่น โดยช่างมืออาชีพ</p>
+        <p class="price-range">฿300–฿900</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ทำสีผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองทำสีผม">
+        <input type="hidden" name="service" value="ทำสีผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 3 -->
+    <div class="service-card">
+      <img th:src="@{/images/Manicure.jpg}" alt="ทำเล็บ" />
+      <div class="service-info">
+        <h3>ทำเล็บ</h3>
+        <p>💅 ต่อเล็บเจล • เพ้นท์ลาย • ถอดเล็บ</p>
+        <p class="price-range">฿300–฿500</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ทำเล็บ"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองทำเล็บ">
+        <input type="hidden" name="service" value="ทำเล็บ" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 4 -->
+    <div class="service-card">
+      <img th:src="@{/images/Shave.jpg}" alt="โกนหนวด" />
+      <div class="service-info">
+        <h3>โกนหนวด</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿50–฿150</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="โกนหนวด"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองโกนหนวด">
+        <input type="hidden" name="service" value="โกนหนวด" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 5 -->
+    <div class="service-card">
+      <img th:src="@{/images/wash hair.jpg}" alt="สระผม" />
+      <div class="service-info">
+        <h3>สระผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="สระผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองสระผม">
+        <input type="hidden" name="service" value="สระผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 6 -->
+    <div class="service-card">
+      <img th:src="@{/images/Hair dryer.jpg}" alt="ไดร์ผม" />
+      <div class="service-info">
+        <h3>ไดร์ผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ไดร์ผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองไดร์ผม">
+        <input type="hidden" name="service" value="ไดร์ผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 7 -->
+    <div class="service-card">
+      <img th:src="@{/images/Hair perm.jpg}" alt="ดัดผม" />
+      <div class="service-info">
+        <h3>ดัดผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ดัดผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองดัดผม">
+        <input type="hidden" name="service" value="ดัดผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 8 -->
+    <div class="service-card">
+      <img th:src="@{/images/Hair straightening.jpg}" alt="ยืดผม" />
+      <div class="service-info">
+        <h3>ยืดผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ยืดผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองยืดผม">
+        <input type="hidden" name="service" value="ยืดผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 9 -->
+    <div class="service-card">
+      <img th:src="@{/images/Hair treatment.jpg}" alt="ทรีตเมนต์บำรุงเส้นผม" />
+      <div class="service-info">
+        <h3>ทรีตเมนต์บำรุงเส้นผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ทรีตเมนต์บำรุงเส้นผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองทรีตเมนต์บำรุงเส้นผม">
+        <input type="hidden" name="service" value="ทรีตเมนต์บำรุงเส้นผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 10 -->
+    <div class="service-card">
+      <img th:src="@{/images/Facial care.jpg}" alt="ดูแลผิวหน้า" />
+      <div class="service-info">
+        <h3>ดูแลผิวหน้า</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ดูแลผิวหน้า"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองดูแลผิวหน้า">
+        <input type="hidden" name="service" value="ดูแลผิวหน้า" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 11 -->
+    <div class="service-card">
+      <img th:src="@{/images/Hair extensions.jpg}" alt="ต่อผม" />
+      <div class="service-info">
+        <h3>ต่อผม</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ต่อผม"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองต่อผม">
+        <input type="hidden" name="service" value="ต่อผม" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+
+    <!-- Service 12 -->
+    <div class="service-card">
+      <img th:src="@{/images/kids.jpg}" alt="ตัดผมเด็ก" />
+      <div class="service-info">
+        <h3>ตัดผมเด็ก</h3>
+        <p>โดยช่างมืออาชีพที่มีประสบการณ์ยาวนาน</p>
+        <p class="price-range">฿200–฿300</p>
+        <div class="rating-row">
+          <div class="stars-ro" data-service="ตัดผมเด็ก"><span></span></div>
+          <small class="rtxt">(กำลังโหลดรีวิว…)</small>
+        </div>
+      </div>
+      <form th:action="@{/booking/select-time}" method="get" aria-label="จองตัดผมเด็ก">
+        <input type="hidden" name="service" value="ตัดผมเด็ก" />
+        <button type="submit" class="book-btn">จองเลย <span>→</span></button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Navbar -->
+  <nav class="bottom-nav" aria-label="เมนูด้านล่าง">
+    <a th:href="@{/profile}">
+      <span class="ico">👤</span><span>โปรไฟล์</span>
+    </a>
+    <a th:href="@{/reviews}" th:classappend="${page=='reviews'} ? ' active'">
+      <span class="ico">⭐</span><span>รีวิว</span>
+    </a>
+    <a th:href="@{/all-bookings}">
+      <span class="ico">📋</span><span>ประวัติการจองคิว</span>
+    </a>
+  </nav>
+
+  <!-- โหลดเรตติ้ง -->
+  <script th:inline="javascript">
+    const API_BASE = /*[[@{/api/services/}]]*/ '/api/services/';
+    const API_RATING_FALLBACK = /*[[@{/api/services/rating}]]*/ '/api/services/rating';
+
+    (async function initRatings(){
+      const items = document.querySelectorAll('.stars-ro');
+      for (const el of items){
+        const svc = el.dataset.service;
+        const textEl = el.parentElement.querySelector('.rtxt');
+
+        const url1 = API_BASE + encodeURIComponent(svc) + '/rating';
+        const url2 = API_RATING_FALLBACK + '?name=' + encodeURIComponent(svc);
+
+        let ok = false;
+        for (const url of [url1, url2]) {
+          try{
+            const res = await fetch(url, { credentials: 'same-origin' });
+            const isJson = res.headers.get('content-type')?.includes('application/json');
+            if(!res.ok || !isJson) throw new Error();
+            const { avgRating, total } = await res.json();
+            el.firstElementChild.style.width = `${(avgRating/5)*100}%`;
+            textEl.textContent = total > 0 ? `${avgRating} (${total} รีวิว)` : 'ยังไม่มีรีวิว';
+            ok = true; break;
+          }catch(e){}
+        }
+        if(!ok){ el.firstElementChild.style.width = '0%'; textEl.textContent = 'โหลดรีวิวไม่สำเร็จ'; }
+      }
+    })();
+  </script>
+</body>
+</html>

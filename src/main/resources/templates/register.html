@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Register - GO2 Booking</title>
+
+  <link rel="stylesheet" th:href="@{/css/main.css}"/>
+  <link rel="stylesheet" th:href="@{/css/login.css}"/>
+
+  <style>
+    .error-message {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body class="login-page" style="position: relative;">
+
+  <!-- ปุ่ม Login/Register มุมบนขวา -->
+  <div class="top-right-buttons">
+    <a th:href="@{/login}" class="btn-small">Login</a>
+    <a th:href="@{/register}" class="btn-small active">Register</a>
+  </div>
+
+  <!-- กล่องฟอร์ม -->
+  <div class="login-card">
+    <div class="form-section">
+      <h2 class="title">Create Account</h2>
+      
+      <!-- FORM REGISTER -->
+      <form th:action="@{/register}" th:object="${user}" method="post">
+
+        <div class="form-group">
+          <input type="text" th:field="*{fullName}" placeholder="Full Name" required class="form-input"/>
+        </div>
+        <br>
+
+        <div class="form-group">
+          <input type="text" th:field="*{username}" placeholder="Username" required class="form-input"/>
+        </div>
+        <br>
+
+        <div class="form-group">
+          <input type="email" th:field="*{email}" placeholder="Email" required class="form-input"/>
+        </div>
+        <br>
+
+        <div class="form-group">
+          <input type="password" th:field="*{password}" placeholder="Password" required class="form-input"/>
+        </div>
+        <br>
+
+        <div class="form-group">
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" required class="form-input"/>
+        </div>
+        <br>
+
+        <!-- แสดงข้อความ error -->
+        <p th:if="${error}" class="error-message" th:text="${error}"></p>
+
+        <button type="submit" class="btn-primary">Register</button>
+      </form>
+    </div>
+
+    <div class="illustration-section">
+      <img th:src="@{/images/photo1.jpg}" alt="Register illustration"/>
+    </div>
+  </div>
+
+</body>
+</html>

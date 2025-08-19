@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>โปรไฟล์ผู้ใช้</title>
+
+  <!-- CSRF (สำหรับ fetch / ฟอร์ม) -->
+  <meta name="_csrf" th:content="${_csrf?.token}" />
+  <meta name="_csrf_header" th:content="${_csrf?.headerName}" />
+
+  <!-- Fonts / Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+  <style>
+    :root{
+      --primary:#3498db;
+      --green:#2ecc71;
+      --danger-a:#ef4444;
+      --danger-b:#dc2626;
+      --text:#333;
+      --bg:#f5f5f5;
+      --card:#fff;
+      --border:#e5e5e5;
+      --radius:16px;
+      --shadow:0 10px 25px rgba(0,0,0,.08);
+    }
+    *{ box-sizing:border-box }
+    body{
+      font-family:'Kanit',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+      background:var(--bg); color:var(--text); margin:40px 16px;
+    }
+    .profile-container{
+      max-width:700px; margin:auto; background:var(--card);
+      padding:28px; border-radius:var(--radius); box-shadow:var(--shadow);
+    }
+    h1{ color:#2c3e50; text-align:center; margin:0 0 18px; font-weight:700 }
+    .avatar{
+      display:block; margin:0 auto 16px; width:110px; height:110px;
+      border-radius:50%; object-fit:cover; border:3px solid #ddd;
+      box-shadow:0 6px 14px rgba(0,0,0,.08);
+    }
+    .info{ font-size:18px; line-height:1.8 }
+    .info p{ margin:6px 0 }
+
+    .alert{
+      background:#d4edda; color:#155724; padding:12px 16px; margin:14px 0 20px;
+      border-radius:10px; border:1px solid #c3e6cb; text-align:center; display:none;
+    }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    /* ปุ่มให้ขนาดเท่ากันทั้ง <a> และ <button> */
+    a.btn, button.btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; min-height:44px; line-height:1;
+      border-radius:12px; text-decoration:none; border:0; cursor:pointer;
+      font-weight:600; color:#fff; font-size:16px; font-family:inherit;
+      -webkit-appearance:none; appearance:none;
+      box-shadow:0 6px 14px rgba(0,0,0,.08);
+      transition:transform .15s, box-shadow .15s, filter .15s;
+    }
+    a.btn:hover, button.btn:hover{ transform:translateY(-1px); box-shadow:0 12px 24px rgba(0,0,0,.12) }
+    a.btn:active, button.btn:active{ transform:none; filter:brightness(.96) }
+
+    .btn-primary{ background:var(--primary) }
+    .btn-green{ background:var(--green) }
+    .btn-logout{ background:linear-gradient(135deg,var(--danger-a),var(--danger-b)) }
+    .btn i{ font-size:16px }
+    .logout-inline{ display:inline }
+
+    .upload-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:8px 0 14px }
+    .upload-row input[type="file"]{
+      background:#fff; border:1px solid var(--border); border-radius:10px; padding:8px;
+    }
+
+    @media (max-width:480px){ .info{ font-size:16px } }
+  </style>
+</head>
+
+<body>
+  <div class="profile-container">
+    <h1>โปรไฟล์ผู้ใช้งาน</h1>
+
+    <div id="successBox" class="alert">✅ อัปโหลดรูปโปรไฟล์สำเร็จ!</div>
+
+    <img id="avatarPreview" class="avatar"
+         th:src="${#strings.isEmpty(user.avatarUrl)} ? @{/images/avatar.png} : ${user.avatarUrl}"
+         alt="avatar" />
+
+    <div class="info">
+      <form id="avatarForm" enctype="multipart/form-data" class="upload-row">
+        <input type="file" name="avatar" id="avatarInput" accept="image/*" required />
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-cloud-arrow-up"></i> อัปโหลดรูปโปรไฟล์
+        </button>
+      </form>
+
+      <p>ชื่อผู้ใช้: <strong th:text="${user.username}">username</strong></p>
+      <p>ชื่อ-นามสกุล: <span th:text="${user.fullName}">fullname</span></p>
+      <p>อีเมล: <span th:text="${user.email}">email</span></p>
+      <p>วันที่สมัคร: <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">07/08/2025</span></p>
+    </div>
+
+    <div class="row" style="margin-top:14px">
+      <a class="btn btn-primary" th:href="@{/profile/edit}">📝 แก้ไขข้อมูล</a>
+      <a class="btn btn-primary" th:href="@{/profile/password}">🔐 เปลี่ยนรหัสผ่าน</a>
+
+      <!-- Logout (POST + CSRF) -->
+      <form th:action="@{/logout}" method="post" class="logout-inline"
+            onsubmit="return confirm('ต้องการออกจากระบบหรือไม่?')">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" class="btn btn-logout">
+          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+          <span>Logout</span>
+        </button>
+      </form>
+
+      <a class="btn btn-green" href="/home">🏠 กลับหน้าหลัก</a>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    const form = document.getElementById("avatarForm");
+    const fileInput = document.getElementById("avatarInput");
+    const preview = document.getElementById("avatarPreview");
+    const successBox = document.getElementById("successBox");
+
+    // CSRF for fetch
+    const CSRF_TOKEN  = /*[[${_csrf?.token}]]*/ null;
+    const CSRF_HEADER = /*[[${_csrf?.headerName}]]*/ null;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const file = fileInput.files?.[0];
+      if (!file) return;
+
+      // ตรวจชนิด/ขนาดเบื้องต้น
+      const okTypes = ["image/png","image/jpeg","image/webp","image/gif"];
+      if (!okTypes.includes(file.type)) { alert("รองรับเฉพาะ PNG / JPG / WEBP / GIF"); return; }
+      if (file.size > 3 * 1024 * 1024) { alert("ขนาดรูปต้องไม่เกิน 3MB"); return; }
+
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const headers = {};
+      if (CSRF_TOKEN && CSRF_HEADER) headers[CSRF_HEADER] = CSRF_TOKEN;
+
+      try{
+        const response = await fetch(/*[[@{/upload-avatar}]]*/ "/upload-avatar", {
+          method: "POST",
+          body: formData,
+          headers,
+          credentials: "same-origin"
+        });
+
+        if (response.ok) {
+          // แสดงรูปใหม่ทันที
+          const reader = new FileReader();
+          reader.onload = () => {
+            preview.src = reader.result;
+            successBox.style.display = "block";
+            setTimeout(()=> successBox.style.display = "none", 2500);
+          };
+          reader.readAsDataURL(file);
+        } else if (response.status === 401 || response.status === 403) {
+          alert("หมดสิทธิ์ใช้งาน โปรดล็อกอินใหม่แล้วลองอีกครั้ง");
+          window.location.href = "/login";
+        } else {
+          const t = await response.text().catch(()=> "");
+          alert("เกิดข้อผิดพลาดในการอัปโหลดรูปโปรไฟล์\n" + t);
+        }
+      }catch(err){
+        alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+      }
+    });
+  </script>
+</body>
+</html>

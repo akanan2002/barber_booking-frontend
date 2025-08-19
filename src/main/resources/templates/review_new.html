@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>ให้รีวิว</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- CSRF -->
+  <meta name="_csrf"        th:content="${_csrf != null ? _csrf.token      : ''}" />
+  <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}" />
+
+  <link rel="stylesheet" th:href="@{/css/main.css}">
+  <style>
+    :root{ --border:#e5e7eb; --muted:#6b7280; --gold:#f5b301; --star-muted:#ddd; }
+    .wrap{ max-width:720px; margin:24px auto; padding:0 16px; }
+    .card{ background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width:680px){ .row{ grid-template-columns:1fr; } }
+    .label{ color:var(--muted); font-size:.9rem; margin-bottom:4px; display:block; }
+    .val{ font-weight:600; }
+    .stars{ display:inline-flex; flex-direction:row-reverse; gap:8px; }
+    .stars input{ display:none }
+    .stars label{ font-size:36px; cursor:pointer; color:var(--star-muted); line-height:1; user-select:none; }
+    .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label{ color:var(--gold) }
+    textarea{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px; }
+    .actions{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+    .btn{ border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer }
+    .btn-primary{ background:#0B63F6; color:#fff }
+    .btn-ghost{ background:#e5e7eb; color:#111 }
+  </style>
+</head>
+<body th:with="b=${booking}">
+  <div class="wrap">
+    <h1 style="margin:0 0 12px 0;">ให้รีวิว — การจอง #<span th:text="${b.id}">0</span></h1>
+
+    <div class="card" style="margin-bottom:14px;">
+      <div class="row">
+        <div>
+          <span class="label">บริการ</span>
+          <div class="val" th:text="${b.service}">-</div>
+        </div>
+        <div>
+          <span class="label">ช่างผู้ให้บริการ</span>
+          <div class="val" th:text="${b.barber}">-</div>
+        </div>
+        <div>
+          <span class="label">วันนัด</span>
+          <div class="val" th:text="${#temporals.format(b.date, 'dd/MM/yyyy')}">-</div>
+        </div>
+        <div>
+          <span class="label">เวลา</span>
+          <div class="val" th:text="${b.time}">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="label">ให้คะแนนเป็นดาว</div>
+      <div class="stars" role="radiogroup" aria-label="ให้คะแนนเป็นดาว">
+        <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+        <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+        <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+        <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+        <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+      </div>
+      <div class="label" style="margin-top:10px;">คอมเมนต์ (ไม่บังคับ)</div>
+      <textarea id="comment" rows="4" placeholder="เล่าประสบการณ์ของคุณ..."></textarea>
+
+      <div class="actions">
+        <a class="btn btn-ghost" th:href="@{'/booking/detail/' + ${b.id}}">ยกเลิก</a>
+        <button class="btn btn-primary" type="button" onclick="submitReview()">ส่งรีวิว</button>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    const POST_REVIEW_URL = /*[[@{/api/reviews}]]*/ '/api/reviews';
+    const bookingId = /*[[${b.id}]]*/ 0;
+
+    async function submitReview(){
+      const rating = Number(document.querySelector('input[name=rating]:checked')?.value);
+      if(!rating){ alert('กรุณาเลือกจำนวนดาว'); return; }
+      const comment = document.getElementById('comment').value.trim();
+
+      // CSRF
+      const csrf = document.querySelector('meta[name="_csrf"]')?.content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+      const headers = { 'Content-Type': 'application/json' };
+      if (csrf && csrfHeader) headers[csrfHeader] = csrf;
+
+      try{
+        const res = await fetch(POST_REVIEW_URL, {
+          method:'POST',
+          headers,
+          body: JSON.stringify({ bookingId: bookingId, rating: rating, comment: comment })
+        });
+        if(res.ok){
+          alert('ขอบคุณสำหรับรีวิว!');
+          window.location.href = /*[[@{'/booking/detail/' + ${b.id}}]]*/ '/all-bookings';
+        }else{
+          const msg = await (async()=>{ try{ return await res.text(); }catch{ return res.status + ' ' + res.statusText; }})();
+          alert('ส่งรีวิวไม่สำเร็จ: ' + msg);
+        }
+      }catch(e){
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      }
+    }
+  </script>
+</body>
+</html>
