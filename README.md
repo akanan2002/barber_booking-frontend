@@ -3,9 +3,7 @@
 UI สำหรับจองคิวร้านตัดผม: เลือกบริการ/ช่าง ดูตารางคิว และยืนยันนัดหมาย  
 > Demo (ออนไลน์เป็นช่วง ๆ ผ่าน ngrok): https://936be72361c8.ngrok-free.app
 
-## Screenshots
-![Home](docs/screenshot-home.png)
-![Calendar](docs/screenshot-calendar.png)
+[ตัวอย่างเว็บไซต์จองคิวร้านตัดผม (PDF)](docs/ตัวอย่างเว็บไซต์จองคิวร้านตัดผม.pdf)
 
 
 
