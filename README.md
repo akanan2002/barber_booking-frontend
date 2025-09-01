@@ -1,23 +1,24 @@
-# barber_booking-frontend
+# Barber Booking — Frontend
 
-# Barber Booking – Frontend
+UI สำหรับจองคิวร้านตัดผม: เลือกบริการ/ช่าง ดูตารางคิว และยืนยันนัดหมาย  
+> Demo (ออนไลน์เป็นช่วง ๆ ผ่าน ngrok): https://936be72361c8.ngrok-free.app  
 
-เว็บ UI สำหรับจองคิวร้านตัดผม: เลือกบริการ/ช่าง ดูตารางคิว และยืนยันนัดหมาย
-
-## Demo
-<!-- ใส่ลิงก์เดโมถ้ามี เช่น Vercel/Netlify -->
 
 ## Features
 - เลือกบริการและช่าง
-- ปฏิทินดูคิวว่าง
-- หน้ายืนยันนัดหมาย (responsive)
+- ปฏิทินเลือกช่วงเวลาจอง (responsive)
+- ดู/ยืนยัน/ยกเลิกนัด
+- [WIP] แจ้งเตือนพื้นฐาน
 
 ## Tech Stack
-<!-- ใส่สแตกจริงของคุณ เช่น React + Vite + Tailwind หรือ HTML/CSS/JS -->
+- **React 18** + **Vite**
+- **Tailwind CSS**
+- ติดต่อ **REST API** จาก Backend (Java/Spring Boot)
 
-## Run locally
-```bash
-# ตัวอย่าง (React/Vite)
-npm install
-npm run dev
-# เปิด http://localhost:5173
+## Requirements
+- Node.js ≥ 18, npm ≥ 9
+
+## Environment
+สร้างไฟล์ `.env` จากตัวอย่างด้านล่าง
+```env
+VITE_API_BASE_URL=http://localhost:8080
